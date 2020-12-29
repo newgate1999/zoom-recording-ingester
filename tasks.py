@@ -21,6 +21,7 @@ from urllib.parse import urlparse, quote
 from cdk import names
 from functools import lru_cache
 import logging
+import helpers.config as config
 
 # suppress warnings for cases where we want to ignore dev cluster dummy certificates
 import urllib3
@@ -675,6 +676,20 @@ def save_gsheets_creds(ctx, filename=None):
         print(f"Error: {e}")
 
 
+@task
+def stack_switch(ctx):
+    stack_name = config.select_stack()
+
+    if stack_name:
+        config.switch_to(stack_name)
+
+
+@task
+def stack_edit_config(ctx):
+    print("edit config")
+    pass
+
+
 ns = Collection()
 ns.add_task(test)
 ns.add_task(codebuild)
@@ -683,6 +698,8 @@ ns.add_task(release)
 ns.add_task(update_requirements)
 
 stack_ns = Collection('stack')
+stack_ns.add_task(stack_switch, 'switch')
+stack_ns.add_task(stack_edit_config, 'edit-config')
 stack_ns.add_task(status)
 stack_ns.add_task(stack_list, 'list')
 stack_ns.add_task(stack_synth, 'synth')
